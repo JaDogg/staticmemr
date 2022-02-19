@@ -14,7 +14,6 @@
 #ifndef MEMMGR_H
 #define MEMMGR_H
 #include <stdint.h>
-
 //
 // Memory manager: dynamically allocates memory from
 // a fixed pool that is allocated statically at link-time.
@@ -69,16 +68,10 @@
 // 1. This memory manager is *not thread safe*. Use it only
 //    for single thread/task applications.
 //
-
 #define DEBUG_MEMMGR_SUPPORT_STATS 1
-
 #define POOL_SIZE 8 * 1024
 #define MIN_POOL_ALLOC_QUANTAS 16
-
-
 typedef uint64_t memmgr_int_t;
-
-
 // Initialize the memory manager. This function should be called
 // only once in the beginning of the program.
 //
@@ -99,6 +92,4 @@ void memmgr_free(void *ap);
 // manager
 //
 void memmgr_print_stats();
-
-
 #endif// MEMMGR_H
