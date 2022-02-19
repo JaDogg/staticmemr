@@ -9,4 +9,4 @@ Based on public domain code by `Eli Bendersky (eliben at gmail.com)`.
 2. Uses `stdint.h` for unsigned data types.
 3. Added `memmgr_realloc(p, size)`.
 4. Added `memmgr_calloc(num, size)`.
-5. Added data type `memmgr_int_t`."# staticmemr" 
+5. Added data type `memmgr_int_t`. 
