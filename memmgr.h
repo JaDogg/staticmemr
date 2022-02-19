@@ -69,8 +69,12 @@
 //    for single thread/task applications.
 //
 #define DEBUG_MEMMGR_SUPPORT_STATS 1
+#ifndef POOL_SIZE
 #define POOL_SIZE 8 * 1024
+#endif
+#ifndef MIN_POOL_ALLOC_QUANTAS
 #define MIN_POOL_ALLOC_QUANTAS 16
+#endif
 typedef uint64_t memmgr_int_t;
 // Initialize the memory manager. This function should be called
 // only once in the beginning of the program.
