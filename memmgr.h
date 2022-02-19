@@ -1,6 +1,6 @@
 //----------------------------------------------------------------
 //
-// Copyright (c) 2022 Bhathiya Perera
+// Few features added by Bhathiya Perera
 //
 // Added memmgr_realloc, memmgr_calloc
 // Should not crash if NULL is passed to memmgr_free
