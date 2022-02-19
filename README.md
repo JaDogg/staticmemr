@@ -2,6 +2,9 @@
 
 Based on public domain code by `Eli Bendersky (eliben at gmail.com)`.
 
+### Why?
+Pretend to use heap memory while using a stack allocated block of memory.
+
 
 ### Tiny modifications added.
 
