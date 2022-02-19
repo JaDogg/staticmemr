@@ -1,4 +1,5 @@
-#include "memmgr.h"
+#define STMMR_IMPL
+#include "stmmr.h"
 #include <stdio.h>
 struct point {
   int64_t x;
@@ -7,17 +8,17 @@ struct point {
   int64_t b;
 };
 int main(void) {
-  memmgr_init();
+  stmmr_init();
   for (int i = 0; i < 30000; i++) {
-    struct point *p = memmgr_alloc(sizeof(struct point) * 5);
+    struct point *p = stmmr_alloc(sizeof(struct point) * 5);
     if (p) {
       p[0].a = 1;
       p[0].b = 2;
       p[0].x = 3;
       p[0].y = 4;
-      struct point *px = memmgr_realloc(p, 10);
+      struct point *px = stmmr_realloc(p, 10);
       if (p != px) { printf("realloc did not allocate memory \n"); }
-      p = memmgr_realloc(p, sizeof(struct point) * 10);
+      p = stmmr_realloc(p, sizeof(struct point) * 10);
       if (p) {
         printf("%lld\n", p[0].x);
         p[2].a = 10;
@@ -29,17 +30,17 @@ int main(void) {
         printf("%lld, ", p[2].x);
         printf("%lld\n", p[2].y);
       }
-      memmgr_free(p);
+      stmmr_free(p);
     } else {
       printf("Failed to memory allocate\n");
     }
-    uint8_t *pp = memmgr_calloc(1, 100);
+    uint8_t *pp = stmmr_calloc(1, 100);
     if (pp) {
       for (int j = 0; j < 100; j++) {
         if (pp[j] != 0) { printf("j=%d\n", j); }
       }
     }
-    if (i % 2 == 0) { memmgr_free(pp); }
+    if (i % 2 == 0) { stmmr_free(pp); }
   }
   return 0;
 }

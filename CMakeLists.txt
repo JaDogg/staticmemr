@@ -3,4 +3,4 @@ project(staticmemr C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(staticmemr main.c memmgr.c memmgr.h)
+add_executable(staticmemr main.c stmmr.h)
