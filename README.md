@@ -16,8 +16,7 @@ Pretend to use heap memory while using a stack allocated fixed size (during comp
 ### Tiny modifications added.
 1. `stmmr_free` does not continue if pointer is `NULL`.
 2. Uses `stdint.h` for unsigned data types. This is now therefore need `C99`.
-3. Added `stmmr_realloc(p, size)`.
-  * This uses the hidden header allocated behind the pointer to get the size of current memory block. 
+3. Added `stmmr_realloc(p, size)`. - This uses the hidden header allocated behind the pointer to get the size of current memory block. 
 5. Added `stmmr_calloc(num, size)`.
 6. Added data type `stmmr_int_t`. 
 7. Single header implementation. `#define STMMR_IMPL` in one `C` file before including `stmmr.h`. For other files just include `stmmr.h`
