@@ -6,7 +6,7 @@ Changes added By - Bhathiya Perera AKA JaDogg. 🌞
 Pretend to use heap memory while using a stack allocated block of memory.
 
 ### Usage
-1. Method 1) Rename `malloc` etc to appropriate functions provided here.
+1. Rename `malloc` etc to functions provided here using something like `#define malloc stmmr_malloc`.
 2. For libraries you use override appropriate `#define`s and point them to `stmmr_xxx` functions. 
 
 
