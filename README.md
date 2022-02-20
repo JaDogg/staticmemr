@@ -1,4 +1,4 @@
-# Stack Memory Allocator
+# STMMR - Fixed Size Stack Memory Allocator
 Based on public domain code by `Eli Bendersky (eliben at gmail.com)`.
 
 Changes added By - Bhathiya Perera AKA JaDogg. 🌞
