@@ -8,15 +8,18 @@ Pretend to use heap memory while using a stack allocated block of memory.
 ### Usage
 1. Rename `malloc` etc to functions provided here using something like `#define malloc stmmr_malloc`.
 2. For libraries you use override appropriate `#define`s and point them to `stmmr_xxx` functions. 
+3. Do not mix with any other allocator's allocated memory.
+4. Available methods. `stmmr_malloc`, `stmmr_free`, `stmmr_realloc`, `stmmr_calloc`.
 
 
 ### Tiny modifications added.
 1. `stmmr_free` does not continue if pointer is `NULL`.
 2. Uses `stdint.h` for unsigned data types. This is now therefore need `C99`.
 3. Added `stmmr_realloc(p, size)`.
-4. Added `stmmr_calloc(num, size)`.
-5. Added data type `stmmr_int_t`. 
-6. Single header implementation. `#define STMMR_IMPL` in one `C` file before including `stmmr.h`. For other files just include `stmmr.h`
+  * This uses the hidden header allocated behind the pointer to get the size of current memory block. 
+5. Added `stmmr_calloc(num, size)`.
+6. Added data type `stmmr_int_t`. 
+7. Single header implementation. `#define STMMR_IMPL` in one `C` file before including `stmmr.h`. For other files just include `stmmr.h`
 
 
 # License
