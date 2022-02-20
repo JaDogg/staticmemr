@@ -4,7 +4,7 @@ Based on public domain code by `Eli Bendersky (eliben at gmail.com)`.
 Changes added By - Bhathiya Perera AKA JaDogg. 🌞
 
 ### Why?
-Pretend to use heap memory while using a stack allocated block of memory.
+Pretend to use heap memory while using a stack allocated fixed size (during compile time) block of memory.
 
 ### Usage
 1. Rename `malloc` etc to functions provided here using something like `#define malloc stmmr_malloc`.
