@@ -82,7 +82,11 @@ typedef uint64_t stmmr_int_t;
 // Initialize the memory manager. This function should be called
 // only once in the beginning of the program.
 //
+#ifndef STMMR_CUSTOM_POOL
 void stmmr_init();
+#else
+void stmmr_init(uint8_t* free_memory_chunk);
+#endif
 // 'malloc' clone
 //
 void *stmmr_alloc(stmmr_int_t nbytes);
