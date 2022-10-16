@@ -43,6 +43,10 @@
 // you'll probably want to keep those undefined, because
 // they cause printf to be called.
 //
+//
+// STMMR_CUSTOM_POOL
+//    Allow for a custom pool to be provided. (must be of size STMMR_POOL_SIZE)
+//
 // STMMR_POOL_SIZE
 //    Size of the pool for new allocations. This is
 //    effectively the heap size of the application, and can
@@ -68,7 +72,6 @@
 // 1. This memory manager is *not thread safe*. Use it only
 //    for single thread/task applications.
 //
-#define STMMR_DEBUG_SUPPORT_STATS 1
 #ifndef STMMR_POOL_SIZE
 #define STMMR_POOL_SIZE 8 * 1024
 #endif
@@ -115,39 +118,50 @@ union stmmr_mem_header_union {
 typedef union stmmr_mem_header_union stmmr_mem_header_t;
 // Initial empty list
 //
-static stmmr_mem_header_t base;
+static stmmr_mem_header_t stmmr_base;
 // Start of free list
 //
-static stmmr_mem_header_t *freep = 0;
+static stmmr_mem_header_t *stmmr_freep = 0;
 // Static pool for new allocations
 //
-static uint8_t real_pool[STMMR_POOL_SIZE] = {0};
-static uint8_t *pool = real_pool;
-static stmmr_int_t pool_free_pos = 0;
+static stmmr_int_t stmmr_pool_free_pos = 0;
+#ifndef STMMR_CUSTOM_POOL
+static uint8_t stmmr_real_pool[STMMR_POOL_SIZE] = {0};
+static uint8_t *stmmr_pool = stmmr_real_pool;
 void stmmr_init() {
-  base.s.next = 0;
-  base.s.size = 0;
-  freep = 0;
-  pool_free_pos = 0;
+  stmmr_base.s.next = 0;
+  stmmr_base.s.size = 0;
+  stmmr_freep = 0;
+  stmmr_pool_free_pos = 0;
 }
+#else
+static uint8_t *stmmr_pool = NULL;
+void stmmr_init(uint8_t* free_memory_chunk) {
+  stmmr_base.s.next = 0;
+  stmmr_base.s.size = 0;
+  stmmr_freep = 0;
+  stmmr_pool_free_pos = 0;
+  stmmr_pool = free_memory_chunk;
+}
+#endif
 void stmmr_print_stats() {
 #ifdef STMMR_DEBUG_SUPPORT_STATS
   stmmr_mem_header_t *p;
   printf("------ Memory manager stats ------\n\n");
-  printf("Pool: free_pos = %llu (%llu bytes left)\n\n", pool_free_pos,
-         STMMR_POOL_SIZE - pool_free_pos);
-  p = (stmmr_mem_header_t *) pool;
-  while (p < (stmmr_mem_header_t *) (pool + pool_free_pos)) {
+  printf("Pool: free_pos = %llu (%llu bytes left)\n\n", stmmr_pool_free_pos,
+         STMMR_POOL_SIZE - stmmr_pool_free_pos);
+  p = (stmmr_mem_header_t *) stmmr_pool;
+  while (p < (stmmr_mem_header_t *) (stmmr_pool + stmmr_pool_free_pos)) {
     printf("  * Addr: %p; Size: %8llu\n", p, p->s.size);
     p += p->s.size;
   }
   printf("\nFree list:\n\n");
-  if (freep) {
-    p = freep;
+  if (stmmr_freep) {
+    p = stmmr_freep;
     while (1) {
       printf("  * Addr: %p; Size: %8llu; Next: %p\n", p, p->s.size, p->s.next);
       p = p->s.next;
-      if (p == freep) break;
+      if (p == stmmr_freep) break;
     }
   } else {
     printf("Empty\n");
@@ -160,19 +174,19 @@ static stmmr_mem_header_t *stmmr_get_mem_from_pool(stmmr_int_t nquantas) {
   if (nquantas < STMMR_MIN_POOL_ALLOC_QUANTAS)
     nquantas = STMMR_MIN_POOL_ALLOC_QUANTAS;
   total_req_size = nquantas * sizeof(stmmr_mem_header_t);
-  if (pool_free_pos + total_req_size <= STMMR_POOL_SIZE) {
+  if (stmmr_pool_free_pos + total_req_size <= STMMR_POOL_SIZE) {
     stmmr_mem_header_t *h;
-    h = (stmmr_mem_header_t *) (pool + pool_free_pos);
+    h = (stmmr_mem_header_t *) (stmmr_pool + stmmr_pool_free_pos);
     h->s.size = nquantas;
     stmmr_free((void *) (h + 1));
-    pool_free_pos += total_req_size;
+    stmmr_pool_free_pos += total_req_size;
   } else {
     return 0;
   }
-  return freep;
+  return stmmr_freep;
 }
 // Allocations are done in 'quantas' of header size.
-// The search for a free block of adequate size begins at the point 'freep'
+// The search for a free block of adequate size begins at the point 'stmmr_freep'
 // where the last block was found.
 // If a too-big block is found, it is split and the tail is returned (this
 // way the header of the original needs only to have its size adjusted).
@@ -189,12 +203,12 @@ void *stmmr_alloc(stmmr_int_t nbytes) {
   stmmr_int_t nquantas =
       (nbytes + sizeof(stmmr_mem_header_t) - 1) / sizeof(stmmr_mem_header_t) +
       1;
-  // First alloc call, and no free list yet ? Use 'base' for an initial
+  // First alloc call, and no free list yet ? Use 'stmmr_base' for an initial
   // denegerate block of size 0, which points to itself
   //
-  if ((prevp = freep) == 0) {
-    base.s.next = freep = prevp = &base;
-    base.s.size = 0;
+  if ((prevp = stmmr_freep) == 0) {
+    stmmr_base.s.next = stmmr_freep = prevp = &stmmr_base;
+    stmmr_base.s.size = 0;
   }
   for (p = prevp->s.next;; prevp = p, p = p->s.next) {
     // big enough ?
@@ -211,7 +225,7 @@ void *stmmr_alloc(stmmr_int_t nbytes) {
         p += p->s.size;
         p->s.size = nquantas;
       }
-      freep = prevp;
+      stmmr_freep = prevp;
       return (void *) (p + 1);
     }
     // Reached end of free list ?
@@ -221,7 +235,7 @@ void *stmmr_alloc(stmmr_int_t nbytes) {
     // to stmmr_get_mem_from_pool doesn't succeed, we've run out of
     // memory
     //
-    else if (p == freep) {
+    else if (p == stmmr_freep) {
       if ((p = stmmr_get_mem_from_pool(nquantas)) == 0) {
 #ifdef STMMR_DEBUG_FATAL
         printf("!! Memory allocation failed !!\n");
@@ -231,7 +245,7 @@ void *stmmr_alloc(stmmr_int_t nbytes) {
     }
   }
 }
-// Scans the free list, starting at freep, looking the the place to insert the
+// Scans the free list, starting at stmmr_freep, looking the the place to insert the
 // free block. This is either between two existing blocks or at the end of the
 // list. In any case, if the block being freed is adjacent to either neighbor,
 // the adjacent blocks are combined.
@@ -245,7 +259,7 @@ void stmmr_free(void *ap) {
   // Find the correct place to place the block in (the free list is sorted by
   // address, increasing order)
   //
-  for (p = freep; !(block > p && block < p->s.next); p = p->s.next) {
+  for (p = stmmr_freep; !(block > p && block < p->s.next); p = p->s.next) {
     // Since the free list is circular, there is one link where a
     // higher-addressed block points to a lower-addressed block.
     // This condition checks if the block should be actually
@@ -269,7 +283,7 @@ void stmmr_free(void *ap) {
   } else {
     p->s.next = block;
   }
-  freep = p;
+  stmmr_freep = p;
 }
 void *stmmr_realloc(void *ap, stmmr_int_t nbytes) {
   if (NULL == ap) {
