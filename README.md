@@ -14,7 +14,7 @@ Pretend to use heap memory while using a stack allocated fixed size (during comp
 2. For libraries you use override appropriate `#define`s and point them to `stmmr_xxx` functions.
 3. Do not mix with any other allocator's allocated memory. ☠️☠️
 4. Available methods. `stmmr_malloc`, `stmmr_free`, `stmmr_realloc`, `stmmr_calloc`.
-5. Do not use other any function that allocates memory behind the back. ☠️
+5. Do not use any other function that allocates memory behind the back. ☠️
 
 ### Tiny modifications added.
 
